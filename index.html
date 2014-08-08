@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+
+	<meta charset="utf-8">
+	
+	<!--meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1.0"  /-->
+	<meta name="viewport" content="width=500px"  />
+
+	<head>
+	  
+
+		<script type="text/javascript">
+		<!--
+			var socket = null;
+			var connectionId = null;
+			var chat = null;
+			var chatInput = null;
+			var color = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+
+			document.addEventListener("DOMContentLoaded",function(){
+				initSocket();
+				chat = document.getElementById('chat');
+				chatInput = document.getElementById('chatInput');
+			},false);
+			
+			
+			document.addEventListener("mousemove",function(event){
+				
+				//event.clientX,event.clientY;
+				
+			},false);
+
+			function initSocket() {
+				
+				socket = new WebSocket(document.URL.replace("http","ws"));
+				
+				socket.onopen = function(){  
+					console.log("Socket connected")	
+				};
+				
+				socket.onmessage = function(msg){
+					var msgObject = JSON.parse(msg.data);
+					console.log(msgObject);
+					if(msgObject.msg == 'connectionId') {
+						connectionId = msgObject.id;
+					};
+
+					if(msgObject.msg == 'chatMsg') {
+						chat.innerHTML += '<span style="color:'+msgObject.color+';">'+ msgObject.chatMsg+'</span><br>';
+						chat.scrollTop = chat.scrollHeight;
+					};	
+				};
+			};
+			
+			function sendWebsocketMessage(msgObject) {
+				msgObject = JSON.stringify(msgObject);
+				socket.send(msgObject);
+			};
+
+			function keyPress(e) {
+				var pressedKey = e.keyCode ;
+				if( pressedKey == 13 ){
+					sendWebsocketMessage(
+						{ color: color, chatMsg :  chatInput.value, msg : 'chatMsg' }
+					);
+					chatInput.value = '';
+				};
+			};
+
+		
+		//-->
+		</script>
+
+		<style type="text/css">
+		<!--
+			body,html {
+				margin: 0;
+				padding: 0;
+				font-family: arial;
+				font-size: 0.85em;
+			} 
+			#chat {
+				border: 1px solid grey;
+				position: absolute;
+				height: calc( 100% - 40px ) ;
+				width: 200px;
+				top:0;
+				right:0;
+				overflow-x: hidden;
+   				 overflow-y: scroll;
+			}
+
+			#chatInput {
+				position: absolute;
+				bottom:10px;
+				right:0;
+				width:200px;
+			}
+
+		-->
+		</style>
+		
+		
+	</head>
+	
+	<body onkeydown="keyPress(event);">
+	
+		<div id="chat"></div>
+		<input id="chatInput" type="text" name="chatMsg">
+
+		<button type="button" onmousedown="" >DO</button>
+		
+	</body>
+	
+</html>
