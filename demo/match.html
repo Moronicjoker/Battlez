@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+
+	<meta charset="utf-8">
+	
+	<!--meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1.0"  /-->
+	<meta name="viewport" content="width=500px"  />
+
+	<head>
+	  
+
+		<script type="text/javascript">
+		<!--
+			
+			/*
+			Positions:
+				| 0 | 1 | 2 |
+				| 3 | 4 | 5 |
+			*/
+			var footman = {
+				attack : 'melee',
+				range : 1,
+				health : 2,
+				damage : 1,
+				position :  null
+			}; 
+
+
+			var match = {
+				units : {},
+				idCounter : 0,
+				addUnit : function( playerId, type, position ){
+					console.log('addUnit: ', playerId, type, position );
+					var newUnit = Object.create( type );
+					newUnit.position = position;
+					newUnit.playerId = playerId;
+
+					if( !this.positionFree( this.idCounter, position ) ){
+						console.log('no unit created');
+						return;
+					};
+
+					this.units[ this.idCounter ] = newUnit;
+					this.idCounter += 1;
+				},
+				getUnitById : function(unitId){
+					return match.units[unitId];
+				},
+				getUnitsByPlayerId : function( playerId ){
+					console.log('getUnitsByPlayerId: ', playerId );
+					var allUnits = [];
+					for( singleUnit in this.units ){
+						if( this.units[ singleUnit ].playerId == playerId ){
+							allUnits.push( this.units[ singleUnit ] );
+						};
+					};
+					if( allUnits.length > 0 ) { return allUnits } else { return false };
+				},
+				moveUnit : function( unitId, position ){
+					console.log('moveUnit', unitId, position );
+					// position free
+					console.log( this.positionFree( unitId, position ) );
+
+
+					// in range
+
+					// move unit to position
+
+
+				},
+				positionFree : function( unitId, position ){
+					var positionFree = true;
+					for( singleUnit in this.units ){
+						if( this.units[ singleUnit ].position == position && singleUnit !== unitId ){
+							positionFree = false;
+						};
+					};
+					if( positionFree == false ){ 
+						console.log('position:'+ position +' occupied!');
+						return false;
+					} else {
+						return true;
+					};
+				}
+			};
+
+			match.addUnit( 'player1', footman, 0 );
+			match.addUnit( 'player1', footman, 1 );
+		
+		//-->
+		</script>
+
+		<style type="text/css">
+		<!--
+		
+		-->
+		</style>
+		
+		
+	</head>
+	
+	<body>
+	
+		<div id="content"></div>
+
+		player: 
+		<button type="button" onmousedown="console.log( match.getUnitsByPlayerId( 'player1' ) )" > 0 </button>
+		<button type="button" onmousedown="console.log( match.getUnitsByPlayerId( 'player2' ) )" > 1 </button>
+		<button type="button" onmousedown="match.moveUnit(0,1)" > move 0 to 1 </button>
+		<button type="button" onmousedown="match.moveUnit(0,2)" > move 0 to 2 </button>
+		<button type="button" onmousedown="match.addUnit( 'player1', footman, 0 );" > add unit to position 1 </button>
+		
+	</body>
+	
+</html>
