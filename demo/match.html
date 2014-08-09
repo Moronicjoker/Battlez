@@ -10,18 +10,28 @@
 	  
 
 		<script type="text/javascript">
-		<!--
-			
+		<!--	
 			/*
 			Positions:
 				| 0 | 1 | 2 |
 				| 3 | 4 | 5 |
 			*/
+			var battelground = [ 
+				[0,0], // [x,y]
+				[1,0],
+				[2,0],
+				[0,1],
+				[1,1],
+				[2,1]
+			];
+
 			var footman = {
+				alive : true,
 				attack : 'melee', 	// type of attack
-				range : 1,			// how far does attack reach
+				attackRange : 1,	// how far does attack- reach
 				baseMoves : 1,		// basic moves per turn
-				moves: 1,			// current moves available
+				moveRange : 1,		// how far does move reach
+				moves: 1,			// current moves available -> TODO turn system
 				baseHealth : 2,		// basic health points, when unit is healed this is health max
 				health : 2,			// current health points
 				damage : 1,			// base damage points
@@ -35,6 +45,10 @@
 
 			var match = {
 				units : {},
+				player: {
+					player1 : { color: '#ff0000', units : 0 },
+					player2 : { color: '#0000ff', units : 0 }
+				},
 				idCounter : 0,
 				addUnit : function( playerId, type, position ){
 					console.log('addUnit: ', playerId, type, position );
@@ -53,6 +67,8 @@
 
 					this.units[ this.idCounter ] = newUnit;
 					this.idCounter += 1;
+
+					this.player[ playerId ].units += 1;
 				},
 				getUnitById : function(unitId){
 					return match.units[unitId];
@@ -73,7 +89,16 @@
 					if( !this.positionFree( unitId, position ) ) return;
 
 					var unitToMove = this.getUnitById( unitId );
-					// TODO in range
+					//  in range
+
+					var moveDistance = distance( battelground[ unitToMove.position ], battelground[ position ] );
+
+					console.log('moveDistance: ',moveDistance);
+
+					if( moveDistance > unitToMove.moveRange  ){ 
+						console.log('position to move to is to far away!');
+						return; 
+					};
 
 					// move unit to position
 					// clear origin
@@ -104,16 +129,21 @@
 					var target = this.getUnitById( targetUnitId );
 					target.health = target.health - attacker.damage;
 					if( target.health <= 0 ){
-						getPBattlegroundPatch( target.position ).style.backgroundColor = '#ffffff';
-						delete this.units[targetUnitId];
+						getPBattlegroundPatch( target.position ).style.backgroundColor = '#aaaaaa';
+						this.units[ targetUnitId ].alive = false;
+						this.player[this.getUnitById( targetUnitId ).playerId].units -= 1;
 					};
 
 					this.resolveMatch();
 
 				},
 				resolveMatch : function(){
-					// check if user has no units left and lost the match
-					console.log('TODO');
+					// check if user has no living units left and lost the match
+					for( singlePlayer in this.player ){
+						if( this.player[singlePlayer].units == 0 ){
+							alert( singlePlayer + ' has lost the match!');
+						};
+					};
 				}
 			};
 		
@@ -121,6 +151,14 @@
 				return document.getElementById( 'field_' + position ) ;
 			};
 
+			function distance( position1, position2 ){ // [x1,y1],[x2,y2] 
+				console.log('distance: ', position1, position2 );
+				return Math.sqrt( Math.abs( ( position2[0] - position1[0]) + ( position2[1] - position1[1]) ) );
+			};
+
+			function square(x){
+				return x * x;
+			};
 		//-->
 		</script>
 
@@ -162,6 +200,7 @@
 		player: <br>
 		<button type="button" onmousedown="match.addUnit( 'player1', footman, 0 );" > player1 add footman to position 0 </button>
 		<button type="button" onmousedown="match.addUnit( 'player2', footman, 5 );" > player2 add footman to position 5 </button><br>
+		<button type="button" onmousedown="match.moveUnit(0,0)" > move unit 0 to 0 </button>
 		<button type="button" onmousedown="match.moveUnit(0,1)" > move unit 0 to 1 </button>
 		<button type="button" onmousedown="match.moveUnit(0,2)" > move unit 0 to 2 </button>
 		<button type="button" onmousedown="match.moveUnit(0,5)" > move unit 0 to 5 </button><br>
