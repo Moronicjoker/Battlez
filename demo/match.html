@@ -18,13 +18,20 @@
 				| 3 | 4 | 5 |
 			*/
 			var footman = {
-				attack : 'melee',
-				range : 1,
-				health : 2,
-				damage : 1,
-				position :  null
+				attack : 'melee', 	// type of attack
+				range : 1,			// how far does attack reach
+				baseMoves : 1,		// basic moves per turn
+				moves: 1,			// current moves available
+				baseHealth : 2,		// basic health points, when unit is healed this is health max
+				health : 2,			// current health points
+				damage : 1,			// base damage points
+				position :  null	// position on battelground
 			}; 
 
+			var player = {
+				player1 : { color: '#ff0000' },
+				player2 : { color: '#0000ff' }
+			};
 
 			var match = {
 				units : {},
@@ -35,10 +42,14 @@
 					newUnit.position = position;
 					newUnit.playerId = playerId;
 
+					newUnit.color = player[ playerId ].color;
+
 					if( !this.positionFree( this.idCounter, position ) ){
 						console.log('no unit created');
 						return;
 					};
+
+					getPBattlegroundPatch( position ).style.backgroundColor = newUnit.color;
 
 					this.units[ this.idCounter ] = newUnit;
 					this.idCounter += 1;
@@ -59,14 +70,19 @@
 				moveUnit : function( unitId, position ){
 					console.log('moveUnit', unitId, position );
 					// position free
-					console.log( this.positionFree( unitId, position ) );
+					if( !this.positionFree( unitId, position ) ) return;
 
-
-					// in range
+					var unitToMove = this.getUnitById( unitId );
+					// TODO in range
 
 					// move unit to position
+					// clear origin
+					getPBattlegroundPatch( unitToMove.position ).style.backgroundColor = '#ffffff';
 
+					// set new position
+					getPBattlegroundPatch( position ).style.backgroundColor = unitToMove.color;
 
+					unitToMove.position = position;
 				},
 				positionFree : function( unitId, position ){
 					var positionFree = true;
@@ -81,18 +97,51 @@
 					} else {
 						return true;
 					};
+				},
+				attack : function( attackerUnitId, targetUnitId ){
+					console.log('attack', attackerUnitId,' --> ', targetUnitId );
+					var attacker = this.getUnitById( attackerUnitId );
+					var target = this.getUnitById( targetUnitId );
+					target.health = target.health - attacker.damage;
+					if( target.health <= 0 ){
+						getPBattlegroundPatch( target.position ).style.backgroundColor = '#ffffff';
+						delete this.units[targetUnitId];
+					};
+
+					this.resolveMatch();
+
+				},
+				resolveMatch : function(){
+					// check if user has no units left and lost the match
+					console.log('TODO');
 				}
 			};
-
-			match.addUnit( 'player1', footman, 0 );
-			match.addUnit( 'player1', footman, 1 );
 		
+			function getPBattlegroundPatch( position ){
+				return document.getElementById( 'field_' + position ) ;
+			};
+
 		//-->
 		</script>
 
 		<style type="text/css">
 		<!--
-		
+
+			#battleground {
+				width: 400px;
+
+			}
+
+			.patch {
+				position: relative;
+				border: 1px solid black;
+				width:100px;
+				height:100px;
+				float:left;
+				margin-right: 10px;
+				margin-bottom: 10px;
+			}
+
 		-->
 		</style>
 		
@@ -101,14 +150,22 @@
 	
 	<body>
 	
-		<div id="content"></div>
+		<div id="battleground">
+			<div class="patch" id="field_0" >0</div>
+			<div class="patch" id="field_1" >1</div>
+			<div class="patch" id="field_2" >2</div>
+			<div class="patch" id="field_3" >3</div>
+			<div class="patch" id="field_4" >4</div>
+			<div class="patch" id="field_5" >5</div>
+		</div>
 
-		player: 
-		<button type="button" onmousedown="console.log( match.getUnitsByPlayerId( 'player1' ) )" > 0 </button>
-		<button type="button" onmousedown="console.log( match.getUnitsByPlayerId( 'player2' ) )" > 1 </button>
-		<button type="button" onmousedown="match.moveUnit(0,1)" > move 0 to 1 </button>
-		<button type="button" onmousedown="match.moveUnit(0,2)" > move 0 to 2 </button>
-		<button type="button" onmousedown="match.addUnit( 'player1', footman, 0 );" > add unit to position 1 </button>
+		player: <br>
+		<button type="button" onmousedown="match.addUnit( 'player1', footman, 0 );" > player1 add footman to position 0 </button>
+		<button type="button" onmousedown="match.addUnit( 'player2', footman, 5 );" > player2 add footman to position 5 </button><br>
+		<button type="button" onmousedown="match.moveUnit(0,1)" > move unit 0 to 1 </button>
+		<button type="button" onmousedown="match.moveUnit(0,2)" > move unit 0 to 2 </button>
+		<button type="button" onmousedown="match.moveUnit(0,5)" > move unit 0 to 5 </button><br>
+		<button type="button" onmousedown="match.attack(0,1)" > unit 0 attack unit 1 </button>
 		
 	</body>
 	
